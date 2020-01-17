@@ -78,9 +78,17 @@ def ajax_save():
 
 @app.post('/ajax/preview')
 def ajax_preview():
+    # TODO here might be a good point to perform preprocessing, and use the pre-processed markdown to create the preview
     doc = app.config['myapp.document']
     doc.text = read_unicode(request.body)
     return doc.get_html()
+
+
+@app.post('/ajax/variables')
+def ajax_variables():
+    doc = app.config['myapp.document']
+    doc.text = read_unicode(request.body)
+    return doc.get_variables()
 
 
 @app.post('/ajax/vim_mode')

@@ -22,6 +22,16 @@ function tryAjaxUpdatePreview() {
                 setTimeout(tryAjaxUpdatePreview, 0);
                 $("#html_result").html(data);
         }});
+        $.ajax({
+            type: "POST",
+            url: "/ajax/variables",
+            data: myCodeMirror.getValue(),
+            contentType: "ext/plain",
+            success: function( data ) {
+                isSending = false;
+                setTimeout(tryAjaxUpdatePreview, 0);
+                $("#variable_list").html(data);
+        }});
     }
 }
 function ajaxSaveFile() {

@@ -40,5 +40,5 @@ class PreProcessor:
         text = doc.text
         text = re_variable_definition.sub(r"\2", text)
         for variable_name, variable_value in sorted(self.definitions.items()):
-            text = re.sub(f'(\${variable_name})(?=$|\s)', variable_value, text)
+            text = re.sub(f'(\${variable_name})(?=$|\W)', variable_value, text)
         return text

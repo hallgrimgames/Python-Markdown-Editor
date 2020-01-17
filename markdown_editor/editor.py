@@ -10,6 +10,8 @@ import codecs
 
 from os.path import join
 
+from markdown_editor.additional_syntax import PreProcessor
+
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 sys.path.append(script_dir)
@@ -89,7 +91,7 @@ def write_output(output, text, encoding='utf8'):
 
 
 class MarkdownDocument:
-    def __init__(self, mdtext='', infile=None, outfile=None, md=None, markdown_css=MARKDOWN_CSS,
+    def __init__(self, mdtext='', infile=None, outfile=None, md: markdown.Markdown = None, markdown_css=MARKDOWN_CSS,
                  pygments_css=PYGMENTS_CSS):
         self.input_file = infile
         self.output_file = outfile
@@ -106,9 +108,9 @@ class MarkdownDocument:
                 self.inline_css += pygments_css_file.read()
 
         if not md:
-            self.md = markdown.Markdown(extensions=MARKDOWN_EXT)
+            self.md: markdown.Markdown = markdown.Markdown(extensions=MARKDOWN_EXT)
         else:
-            self.md = md
+            self.md: markdown.Markdown = md
 
         self.text = initial_markdown
         self.form_data = {}  # used by clients to handle custom form actions
@@ -137,7 +139,18 @@ class MarkdownDocument:
         return None, True
 
     def get_html(self):
-        return self.md.reset().convert(self.text)
+        # TODO do pre-processing here, and return result of preprocessing rather than just self.text
+        pp = PreProcessor()
+        the_docs = pp.process([self.text,])
+        print(f"{repr(self.text)} => {repr(the_docs)}")
+        return self.md.reset().convert(the_docs[0])
+
+    def get_variables(self):
+        pp = PreProcessor()
+        pp.process([self.text, ])
+        return "<ul class=\"list-group\">" + "\n".join(
+            f"<li class=\"list-group-item\">${key} = \"{value}\"</li>" for key, value in pp.definitions.items()
+        ) + "</ul>"
 
     def get_html_page(self):
         return u"""\
