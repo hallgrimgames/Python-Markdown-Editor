@@ -58,13 +58,13 @@ class TestPreProcessor(unittest.TestCase):
         pp = PreProcessor()
         my_docs = [
             Doc("doc a.md", "#This is some syntax with a $myVar\n I will say it again: $myVar=\"cool var\""),
-            Doc("doc b.md", "#This is some syntax\n $myVar was used again"),
+            Doc("doc b.md", "#This is some syntax\n $myVar was used again. $myVar2=\"another var\" and $myVar2"),
         ]
 
         pp.collect_variable_definitions(my_docs)
 
         self.assertEqual("#This is some syntax with a cool var\n I will say it again: cool var",
                          pp.insert_variable_definitions(my_docs[0]))
-        self.assertEqual("#This is some syntax\n cool var was used again",
+        self.assertEqual("#This is some syntax\n cool var was used again. another var and another var",
                          pp.insert_variable_definitions(my_docs[1]))
 

@@ -20,6 +20,11 @@ class PreProcessor:
     and replacing their values where they are used.
     """
 
+    def process(self, texts: List[str]):
+        docs = [Doc('', t) for t in texts]
+        self.collect_variable_definitions(docs)
+        return [self.insert_variable_definitions(d) for d in docs]
+
     def collect_variable_definitions(self, docs: List[Doc]):
         definitions = dict()
         for doc in docs:
@@ -34,6 +39,6 @@ class PreProcessor:
         # TODO second insert variable usages
         text = doc.text
         text = re_variable_definition.sub(r"\2", text)
-        for variable_name, variable_value in self.definitions.items():
-            text = text.replace(f"${variable_name}", variable_value)
+        for variable_name, variable_value in sorted(self.definitions.items()):
+            text = re.sub(f'(\${variable_name})(?=$|\s)', variable_value, text)
         return text
