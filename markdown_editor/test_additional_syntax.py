@@ -1,6 +1,7 @@
 import unittest
 
-from markdown_editor.additional_syntax import re_variable_definition, re_variable_insertion, PreProcessor, Doc
+from markdown_editor.additional_syntax import re_variable_definition, re_variable_insertion, PreProcessor, Doc, \
+    MultipleVariableDefinitionsError
 
 
 class TestAdditionalSyntax(unittest.TestCase):
@@ -36,9 +37,34 @@ class TestPreProcessor(unittest.TestCase):
             Doc("doc a.md", "#This is some syntax\n $myVar=\"cool var\""),
             Doc("doc b.md", "#This is some syntax\n $myVar2=\"cool var 2\""),
         ]
-        variable_definitions = pp.collect_variable_definitions(my_docs)
+
+        pp.collect_variable_definitions(my_docs)
+
         self.assertDictEqual({
             "myVar":"cool var",
             "myVar2": "cool var 2"
-        }, variable_definitions)
+        }, pp.definitions)
+
+    def test_defining_same_variable_name_twice_is_not_allowed(self):
+        pp = PreProcessor()
+        my_docs = [
+            Doc("doc a.md", "#This is some syntax\n $myVar=\"cool var\""),
+            Doc("doc b.md", "#This is some syntax\n $myVar=\"cool var 2\""),
+        ]
+        with self.assertRaises(MultipleVariableDefinitionsError):
+            pp.collect_variable_definitions(my_docs)
+
+    def test_inserting_variables_works(self):
+        pp = PreProcessor()
+        my_docs = [
+            Doc("doc a.md", "#This is some syntax with a $myVar\n I will say it again: $myVar=\"cool var\""),
+            Doc("doc b.md", "#This is some syntax\n $myVar was used again"),
+        ]
+
+        pp.collect_variable_definitions(my_docs)
+
+        self.assertEqual("#This is some syntax with a cool var\n I will say it again: cool var",
+                         pp.insert_variable_definitions(my_docs[0]))
+        self.assertEqual("#This is some syntax\n cool var was used again",
+                         pp.insert_variable_definitions(my_docs[1]))
 

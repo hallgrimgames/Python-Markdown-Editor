@@ -27,5 +27,13 @@ class PreProcessor:
                 if variable_name in definitions:
                     raise MultipleVariableDefinitionsError(f"Variable {repr(variable_name)} is defined multiple times!")
                 definitions[variable_name] = variable_value
-        return definitions
-    
+        self.definitions = definitions
+
+    def insert_variable_definitions(self, doc: Doc) -> str:
+        # TODO first insert variables where they are defined
+        # TODO second insert variable usages
+        text = doc.text
+        text = re_variable_definition.sub(r"\2", text)
+        for variable_name, variable_value in self.definitions.items():
+            text = text.replace(f"${variable_name}", variable_value)
+        return text
